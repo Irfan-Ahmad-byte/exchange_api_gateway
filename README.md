@@ -1,42 +1,66 @@
-# 🔐 Authentication Microservice (FastAPI + PostgreSQL + Redis + Docker)
+# 🚪 Gateway API (FastAPI + Redis + Docker)
 
-A robust authentication service built with **FastAPI**, **PostgreSQL**, **Redis**, and **Docker**. Includes user registration, login with JWT access & refresh tokens, session management, token blacklisting, and login history tracking.
+The **Gateway API** serves as the central entry point to multiple microservices including:
+- 🔐 Authentication Service
+- 💱 Exchange Rate Service
+- 🔗 URL Shortener Service
+
+This gateway handles:
+- Centralized routing
+- Authorization via JWT
+- Rate limiting using Redis
+- Service-to-service communication via secure API keys
 
 ---
 
-## 🚀 Features
+## 🧠 Purpose
 
-- User registration & login with email/password  
-- JWT authentication (Access & Refresh tokens)  
-- Redis-based refresh token blacklisting  
-- Secure password hashing (bcrypt)  
-- Login history tracking (IP, User-Agent, Timestamp)  
-- Modular FastAPI structure with Alembic migrations  
-- Dockerized PostgreSQL & Redis  
-- Ready for CI/CD & AWS deployment  
+This project demonstrates:
+- Scalable microservices architecture
+- Secure API design with multiple authentication levels
+- Centralized traffic and rate control
+- Practical DevOps via Docker, health checks, and service isolation
 
 ---
 
 ## 🧱 Tech Stack
 
-- 🐍 FastAPI  
-- 🐘 PostgreSQL  
-- 🐳 Docker & Docker Compose  
-- 🧠 Redis  
-- 🛡️ JWT (python-jose)  
-- 🔒 bcrypt (via PassLib)  
-- 📦 SQLAlchemy + Alembic  
-- ⚙️ GitHub Actions (CI/CD ready)  
+- ⚡ FastAPI
+- 🐳 Docker + Docker Compose
+- 💾 Redis (rate limiting & caching)
+- 🔐 JWT-based Auth (via external service)
+- 🔄 Async communication with `httpx`
+- ⚙️ GitHub Actions (CI/CD ready)
+
+---
+
+## 🔐 Secure Communication
+
+Each connected microservice follows different security policies:
+
+| Service         | Security       |
+|----------------|----------------|
+| Auth Service    | Public (Bearer Token) |
+| Exchange Service| Secured (X-API-Key + JWT) |
+| URL Shortener   | Public         |
+
+---
+
+## 🔁 Connected Services
+
+- `/auth/*` → Forwards to **Authentication Service**
+- `/exchange/rate/{currency}` → Forwards to **Exchange API** with `Authorization` and API keys
+- `/shorten` & `/{short_code}` → Forwards to **URL Shortener**
 
 ---
 
 ## 📦 Getting Started
 
-### 1. Clone the repository
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/auth-microservice.git
-cd auth-microservice
+git clone https://github.com/your-username/gateway_service.git
+cd gateway_service
 ```
 
 ### 2. Create `.env` file 
@@ -52,29 +76,27 @@ API will be available at: http://localhost:8000
 
 
 ## 🔍 API Endpoints
-- 🔸 POST /auth/register
+### 🔐 Auth Routes
 
-Register a new user with email and password.
+- POST /auth/login
 
-- 🔸 POST /auth/login
+- GET /auth/me
 
-Login and receive access + refresh tokens.
+- POST /auth/logout
 
-- 🔸 POST /auth/refresh
+- GET /auth/login-history
 
-Get a new access token using a valid refresh token (sent in headers).
+- POST /auth/refresh
 
-- 🔸 POST /auth/logout
+### 💱 Exchange Routes
 
-Blacklist the refresh token to force logout.
+- GET /exchange/rate/{currency} → Auth + API Key protected
 
-- 🔸 GET /users/me
+### 🔗 URL Shortener
 
-Fetch current user's information using bearer token.
+- POST /shorten → Shortens a URL
 
-- 🔸 GET /users/login-history
-
-View user's login history (IP address, user agent, timestamp).
+- GET /{short_code} → Redirect to original URL
 
 
 ## 🧪 Testing
@@ -85,11 +107,13 @@ You can use:
 - Or simple browser for redirection
 
 ## 📌 Possible Feature Improvements
-- Email verification via OTP
-- Password reset via email
-- Rate limiting (per IP/token)
-- Admin interface for user management
-- Optional 2FA/MFA integration
+- Add OpenTelemetry-based request tracing
+
+- Admin dashboard to monitor services
+
+- JWT signature validation inside gateway
+
+- Multi-tenant support
 
 ## 👨‍💻 Author
 Built with ❤️ by [Irfan Ahmad](!https://github.com/irfan-ahmad-byte)
